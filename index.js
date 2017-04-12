@@ -90,12 +90,6 @@ function Request(url, options, f, retryConfig) {
    */
   this.delayStrategy = _.isFunction(options.delayStrategy) ? options.delayStrategy : function() { return this.retryDelay; };
 
-  /**
-   * Should request be rejected when retryStrategy fails even if the underlying request suceeds
-   * @type {Boolean}
-   */
-  this.rejectOnRetryStrategyFail = options.rejectOnRetryStrategyFail || false;
-
   this._timeout = null;
   this._req = null;
 
@@ -106,20 +100,19 @@ function Request(url, options, f, retryConfig) {
     this._promise = makePromise(this, retryConfig.promiseFactory);
   }
 
-  this.reply = function requestRetryReply(err, response, body, failed) {
+  this.reply = function requestRetryReply(err, response, body) {
     if (this._callback) {
       return this._callback(err, response, body);
     }
 
     if (err) {
-      return this._reject(err);
-    }
+      if (response) {
+        err.response = response;
+      }
 
-    if (failed) {
-      err = new Error('Request failed retryStrategy check');
-
-      err.response = response;
-      err.body = body;
+      if (body) {
+        err.body = body;
+      }
 
       return this._reject(err);
     }
@@ -137,18 +130,22 @@ Request.prototype._tryUntilFail = function () {
   this.attempts++;
 
   this._req = Request.request(this.options, function (err, response, body) {
+    var retry;
+
     if (response) {
       response.attempts = this.attempts;
     }
-    if (this.retryStrategy(err, response, body)) {
-      if (this.maxAttempts > 0) {
-        this._timeout = setTimeout(this._tryUntilFail.bind(this), this.delayStrategy.call(this, err, response, body));
-        return;
-      }
-      if (this.rejectOnRetryStrategyFail) {
-        this.reply(err, response, body, true);
-        return;
-      }
+
+    try {
+      retry = this.retryStrategy(err, response, body);
+    } catch (err) {
+      this.reply(err, response, body);
+      return;
+    }
+
+    if (retry && this.maxAttempts > 0) {
+      this._timeout = setTimeout(this._tryUntilFail.bind(this), this.delayStrategy.call(this, err, response, body));
+      return;
     }
 
     this.reply(err, response, body);

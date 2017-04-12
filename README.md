@@ -39,10 +39,9 @@ request({
 
 ### With promises
 
-When you're using promises, you can pass the three following options:
+When you're using promises, you can pass the two following options:
 - `fullResponse` _(default true)_ - To resolve the promise with the full response or just the body
 - `promiseFactory` _(default whenjs)_ - A function to allow the usage of a different promise implementation library
-- `rejectOnRetryStrategyFail` _(default false)_ - Indicates whether the request fails if retryStrategy returned true, even if the underlying request succeeded in getting a response from server.
 
 ```javascript
 request({
@@ -93,22 +92,6 @@ request({
 })
 ```
 
-**Using `rejectOnRetryStrategyFail` option to reject the promise on retryStrategy fail**
-
-```javascript
-  request({
-    url: 'https://api.domain.com/v1/a/b',
-    rejectOnRetryStrategyFail: true, // enable reject on failed retryStrategy
-    retryStrategy: function (err, response, body) {
-      return err || (response && response.statusCode === 500);
-    }
-  })
-  .catch(function (err) {
-    // This function will be called if `retryStrategy` returns true after exhausting all attempts.
-    // `err` will have `response` and `body` property set, if the underlying request received a response from the server.
-  });
-```
-
 ## Installation
 
 Install with [npm](https://npmjs.org/package/requestretry).
@@ -129,6 +112,7 @@ A retry strategy let you specify when request-retry should retry a request
 function myRetryStrategy(err, response, body){
   // retry the request if we had an error or if the response was a 'Bad Gateway'
   return err || response.statusCode === 502;
+  // you can also throw an error here, then the request will be interrupted without going through the remaining attempts and the error will be passed to the callback or promise
 }
 
 request({
