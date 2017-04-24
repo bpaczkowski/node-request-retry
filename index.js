@@ -143,8 +143,13 @@ Request.prototype._tryUntilFail = function () {
       return;
     }
 
-    if (retry && this.maxAttempts > 0) {
-      this._timeout = setTimeout(this._tryUntilFail.bind(this), this.delayStrategy.call(this, err, response, body));
+    if (retry) {
+      if (this.maxAttempts > 0) {
+        this._timeout = setTimeout(this._tryUntilFail.bind(this), this.delayStrategy.call(this, err, response, body));
+        return;
+      }
+
+      this.reply(Error('couldn\'t get a correct response'), response, body);
       return;
     }
 
