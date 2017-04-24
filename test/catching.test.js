@@ -3,7 +3,7 @@
 var request = require('../');
 var t = require('chai').assert;
 
-describe.only('Catching retry strategy errors', function () {
+describe('Catching retry strategy errors', function () {
   it('should pass the caught error to callback', function (done) {
     request.get({
       url: 'http://www.filltext.com/?rows=1&err=400',

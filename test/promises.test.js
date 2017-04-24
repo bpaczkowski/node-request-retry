@@ -108,10 +108,6 @@ describe('Promises support', function () {
         promiseFactory: promiseFactoryFn // custom promise factory function
       })
       .then(function (body) {
-        if (throwError) {
-          throw body; // To simulate an error in the request
-        }
-
         t.isString(body);
         var data = JSON.parse(body);
         t.isArray(data);
@@ -133,7 +129,7 @@ describe('Promises support', function () {
       it('should work on request fail', function (done) {
         makeRequest(customPromiseFactory, done, true)
           .catch(function (err) {
-            t.strictEqual(err, 'Internal Server Error');
+            t.strictEqual(err.body, 'Internal Server Error');
             done();
           });
       });
@@ -151,7 +147,7 @@ describe('Promises support', function () {
       it('should work on request fail', function (done) {
         makeRequest(customPromiseFactory, done, true)
           .catch(function (err) {
-            t.strictEqual(err, 'Internal Server Error');
+            t.strictEqual(err.body, 'Internal Server Error');
             done();
           });
       });
@@ -174,7 +170,7 @@ describe('Promises support', function () {
       it('should work on request fail', function (done) {
         makeRequest(customPromiseFactory, done, true)
           .fail(function (err) {
-            t.strictEqual(err, 'Internal Server Error');
+            t.strictEqual(err.body, 'Internal Server Error');
             done();
           });
       });
@@ -194,7 +190,7 @@ describe('Promises support', function () {
       it('should work on request fail', function (done) {
         makeRequest(customPromiseFactory, done, true)
           .catch(function (err) {
-            t.strictEqual(err, 'Internal Server Error');
+            t.strictEqual(err.body, 'Internal Server Error');
             done();
           });
       });

@@ -149,8 +149,10 @@ Request.prototype._tryUntilFail = function () {
         return;
       }
 
-      this.reply(Error('couldn\'t get a correct response'), response, body);
-      return;
+      if (!err) {
+        this.reply(Error('couldn\'t get a correct response'), response, body);
+        return;
+      }
     }
 
     this.reply(err, response, body);
