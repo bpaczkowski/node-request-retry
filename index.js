@@ -175,7 +175,7 @@ Request.prototype.abort = function () {
 });
 
 // expose promise methods
-['then', 'catch', 'finally', 'fail', 'done'].forEach(function (promiseMethod) {
+['then', 'catch', 'finally', 'fail', 'done', 'tap', 'tapCatch'].forEach(function (promiseMethod) {
   Request.prototype[promiseMethod] = function exposedPromiseMethod () {
     if (this._callback) {
       throw new Error('A callback was provided but waiting a promise, use only one pattern');
